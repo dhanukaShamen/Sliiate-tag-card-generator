@@ -1,127 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SLIATE ID Card Generator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: "Inter", sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-        background-color: #f0f0f0;
-      }
-      .container {
-        text-align: center;
-      }
-      #idCard {
-        width: 3.375in;
-        height: 2.125in;
-        border: 2px solid #ffa500;
-        border-radius: 10px;
-        background-color: white;
-        padding: 24px 37px 14px 37px;
-        margin: 20px auto;
-        display: none;
-        box-sizing: border-box;
-        text-align: center;
-      }
-      .logo {
-        width: 0.8in;
-        height: 0.8in;
-        margin: 0 auto 20px;
-      }
-      .logo img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-      #cardRegID {
-        font-size: 20px;
-        font-weight: 700;
-        margin-bottom: 10px;
-      }
-      #cardName {
-        font-size: 20px;
-        font-weight: 500;
-      }
-      input,
-      button {
-        margin: 5px;
-        padding: 5px;
-        font-family: "Inter", sans-serif;
-      }
-      #exportButtons {
-        display: none;
-      }
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        #idCard {
+            width: 3.375in;
+            height: 2.125in;
+            border: 2px solid #FFA500;
+            border-radius: 10px;
+            background-color: white;
+            padding: 24px 37px 14px 37px;
+            margin: 20px auto;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .logo {
+            width: 0.8in;
+            height: 0.8in;
+            margin: 0 auto 20px;
+        }
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        #cardRegID {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        #cardName {
+            font-size: 20px;
+            font-weight: 500;
+        }
+        input, button, textarea {
+            margin: 5px;
+            padding: 5px;
+            font-family: 'Inter', sans-serif;
+        }
+        #bulkInput {
+            width: 100%;
+            height: 100px;
+        }
+        #cardContainer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div class="container">
-      <h1>SLIATE ID Card Generator</h1>
-      <input type="text" id="regID" placeholder="Enter Reg ID" />
-      <input type="text" id="name" placeholder="Enter Name" />
-      <button onclick="generateCard()">Generate ID Card</button>
-
-      <div id="idCard">
-        <div class="logo">
-          <img src="logo.jpg" alt="SLIATE Logo" />
+        <h1>SLIATE ID Card Generator</h1>
+        <textarea id="bulkInput" placeholder="Enter data in format: RegID,Name (one per line)"></textarea>
+        <button onclick="generateBulkCards()">Generate Bulk ID Cards</button>
+        <div id="cardContainer"></div>
+        <div id="exportButtons" style="margin-top: 20px;">
+            <button onclick="exportAsA4PNG()">Export as A4 PNG</button>
+            <button onclick="exportAsA4PDF()">Export as A4 PDF</button>
         </div>
-        <div id="cardRegID"></div>
-        <div id="cardName"></div>
-      </div>
-
-      <div id="exportButtons">
-        <button onclick="exportAsPNG()">Export as PNG</button>
-        <button onclick="exportAsPDF()">Export as PDF</button>
-      </div>
     </div>
 
     <script>
-      function generateCard() {
-        const regID = document.getElementById("regID").value;
-        const name = document.getElementById("name").value;
+        function generateCard(regID, name) {
+            const card = document.createElement('div');
+            card.className = 'idCard';
+            card.style = `
+                width: 3.375in;
+                height: 2.125in;
+                border: 2px solid #FFA500;
+                border-radius: 10px;
+                background-color: white;
+                padding: 24px 37px 14px 37px;
+                box-sizing: border-box;
+                text-align: center;
+                display: inline-block;
+                margin: 10px;
+            `;
+            card.innerHTML = `
+                <div class="logo">
+                    <img src="logo.jpg" alt="SLIATE Logo">
+                </div>
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 10px;">${regID}</div>
+                <div style="font-size: 16px; font-weight: 500;">${name}</div>
+            `;
+            return card;
+        }
 
-        document.getElementById("cardRegID").textContent = regID;
-        document.getElementById("cardName").textContent = name;
-        document.getElementById("idCard").style.display = "block";
-        document.getElementById("exportButtons").style.display = "block";
-      }
-
-      function exportAsPNG() {
-        html2canvas(document.getElementById("idCard"), { scale: 2 }).then(
-          function (canvas) {
-            const link = document.createElement("a");
-            link.download = "sliate-id-card.png";
-            link.href = canvas.toDataURL();
-            link.click();
-          }
-        );
-      }
-
-      function exportAsPDF() {
-        html2canvas(document.getElementById("idCard"), { scale: 2 }).then(
-          function (canvas) {
-            const imgData = canvas.toDataURL("image/png");
-            const pdf = new jspdf.jsPDF({
-              orientation: "landscape",
-              unit: "in",
-              format: [3.375, 2.125],
+        function generateBulkCards() {
+            const bulkInput = document.getElementById('bulkInput').value;
+            const cardContainer = document.getElementById('cardContainer');
+            cardContainer.innerHTML = '';
+            
+            const lines = bulkInput.split('\n');
+            lines.forEach(line => {
+                const [regID, name] = line.split(',');
+                if (regID && name) {
+                    const card = generateCard(regID.trim(), name.trim());
+                    cardContainer.appendChild(card);
+                }
             });
-            pdf.addImage(imgData, "PNG", 0, 0, 3.375, 2.125);
-            pdf.save("sliate-id-card.pdf");
-          }
-        );
-      }
+        }
+
+        function exportAsA4PNG() {
+            const a4Width = 2480; // A4 width at 300 DPI
+            const a4Height = 3508; // A4 height at 300 DPI
+            const canvas = document.createElement('canvas');
+            canvas.width = a4Width;
+            canvas.height = a4Height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, a4Width, a4Height);
+
+            const cards = document.getElementsByClassName('idCard');
+            const promises = Array.from(cards).map(card => html2canvas(card, {scale: 2}));
+
+            Promise.all(promises).then(canvases => {
+                let x = 50, y = 50;
+                canvases.forEach(cardCanvas => {
+                    ctx.drawImage(cardCanvas, x, y, cardCanvas.width, cardCanvas.height);
+                    x += cardCanvas.width + 50;
+                    if (x + cardCanvas.width > a4Width) {
+                        x = 50;
+                        y += cardCanvas.height + 50;
+                    }
+                });
+
+                const link = document.createElement('a');
+                link.download = 'sliate-id-cards-a4.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        function exportAsA4PDF() {
+            const pdf = new jspdf.jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const cards = document.getElementsByClassName('idCard');
+            const promises = Array.from(cards).map(card => html2canvas(card, {scale: 2}));
+
+            Promise.all(promises).then(canvases => {
+                let x = 10, y = 10;
+                canvases.forEach((cardCanvas, index) => {
+                    if (index > 0 && index % 4 === 0) {
+                        pdf.addPage();
+                        x = 10;
+                        y = 10;
+                    }
+                    const imgData = cardCanvas.toDataURL('image/png');
+                    pdf.addImage(imgData, 'PNG', x, y, 85.6, 54);
+                    x += 95.6;
+                    if (x > 200) {
+                        x = 10;
+                        y += 64;
+                    }
+                });
+                pdf.save('sliate-id-cards-a4.pdf');
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
